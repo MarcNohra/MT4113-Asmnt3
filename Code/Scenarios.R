@@ -107,8 +107,12 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
   return(strengthRatio)
 }
 
-scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
-                               reps = 1000, alpha = 0.05) {
+scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2,
+                                      seedNumber = 6272, reps = 1000,
+                                      alpha = 0.05, distributionType = "Normal",
+                                      min1 = NULL, min2 = NULL,
+                                      max1 = NULL, max2 = NULL) {
+  
   # Available cores
   nCores <- detectCores()
   
@@ -142,7 +146,10 @@ scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2, seedN
     simulations <- monteCarlo.NormalDist(seedNumber = seedNumber, reps = reps,
                                          sampleSize = i,
                                          mean1 = mean1, mean2 = mean2,
-                                         sd1 = sd1, sd2 = sd2)
+                                         sd1 = sd1, sd2 = sd2,
+                                         distributionType = distributionType,
+                                         min1 = min1, min2 = min2,
+                                         max1 = max1, max2 = max2)
     
     # Initialise the returned parametric and non parametric pValues martix
     pValues <- matrix(data = NA, nrow = reps, ncol = reps)
@@ -168,7 +175,9 @@ scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2, seedN
 
 
 scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
-                          sd1, sd2, scenario.type) {
+                          sd1, sd2, scenario.type, distributionType = "Normal",
+                          min1 = NULL, min2 = NULL,
+                          max1 = NULL, max2 = NULL) {
   # Get the length of the sampleSizes vector
   sampleSizes.length <- length(sampleSizes)
   
@@ -201,18 +210,27 @@ scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
     if(scenario.type == "Effect Size") {
       strengthRatio <- scenarios.parallel.single(sampleSizes = sampleSizes,
                                                  mean1 = mean1, mean2 = mean2 + i,
-                                                 sd1 = sd1, sd2 = sd2)
+                                                 sd1 = sd1, sd2 = sd2,
+                                                 distributionType = distributionType,
+                                                 min1 = min1, min2 = min2,
+                                                 max1 = max1, max2 = max2)
     }
     else if(scenario.type == "Alpha") {
       strengthRatio <- scenarios.parallel.single(sampleSizes = sampleSizes,
                                                  mean1 = mean1, mean2 = mean2,
                                                  sd1 = sd1, sd2 = sd2,
-                                                 alpha = i)
+                                                 alpha = i,
+                                                 distributionType = distributionType,
+                                                 min1 = min1, min2 = min2,
+                                                 max1 = max1, max2 = max2)
     }
     else if(scenario.type == "Variance") {
       strengthRatio <- scenarios.parallel.single(sampleSizes = sampleSizes,
                                                  mean1 = mean1, mean2 = mean2,
-                                                 sd1 = sd1, sd2 = sd2 + i)
+                                                 sd1 = sd1, sd2 = sd2 + i,
+                                                 distributionType = distributionType,
+                                                 min1 = min1, min2 = min2,
+                                                 max1 = max1, max2 = max2)
     }
     else {
       stop("Parameter Error")

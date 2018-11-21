@@ -66,11 +66,24 @@ scenarios.plot(scenario3.res, sampleSizes, alphaValues)
 # Scenario 4: -------------------------------------------------------------
 # Change the distribution
 
-par(mfrow = c(1, 2))
-hist(rnorm(1e3, life.expect.poor.summary[[1]], life.expect.poor.summary[[2]]))
-hist(rtruncnorm(1e3, life.expect.poor.summary[[3]],
-                life.expect.poor.summary[[4]], life.expect.poor.summary[[1]],
-                life.expect.poor.summary[[2]]))
-par(mfrow = c(1, 1))
+# Create the parameters
+sampleSizes <- c(10, 100, 300, 1000)
+variances <- c(1, 1.2, 1.4, 2, 4)
 
+# Run the scenario
+scenario4.res <- scenarios.run(sampleSizes, variances,
+                               life.expect.rich.summary[[1]],
+                               life.expect.rich.summary[[1]],
+                               life.expect.rich.summary[[2]],
+                               life.expect.rich.summary[[2]],
+                               "Variance", "Truncate",
+                               min1 = life.expect.rich.summary[[3]],
+                               min2 = life.expect.rich.summary[[3]],
+                               max1 = life.expect.rich.summary[[4]],
+                               max2 = life.expect.rich.summary[[4]])
 
+# Display results
+scenario4.res
+
+# Plot the result
+scenarios.plot(scenario4.res, sampleSizes, variances)
