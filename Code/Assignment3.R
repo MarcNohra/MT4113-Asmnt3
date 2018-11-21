@@ -1,3 +1,6 @@
+#I confirm that the following report and associated code is my own work, except
+# where clearly indicated.
+
 if(!require(dslabs)) install.packages("dslabs")
 if(!require(dplyr)) install.packages("dplyr")
 if(!require(ggplot2)) install.packages("ggplot2")

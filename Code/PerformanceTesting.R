@@ -6,6 +6,12 @@ scenarios(sampleSizes = c(10, 100, 200, 300),
           sd1 = life.expect.poor.summary[[2]],
           sd2 = life.expect.poor.summary[[2]])
 
+scenarios(sampleSizes = c(10, 100, 1000),
+          mean1 = 3,
+          mean2 = 3,
+          sd1 = 1,
+          sd2 = 1)
+
 profvis::profvis(scenarios(sampleSizes = c(10, 100, 200, 1000),
                            mean1 = life.expect.poor.summary[[1]],
                            mean2 = life.expect.poor.summary[[1]],

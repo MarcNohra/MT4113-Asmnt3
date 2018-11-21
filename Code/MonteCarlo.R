@@ -1,3 +1,5 @@
+if(!require(truncnorm)) install.packages("truncnorm")
+
 # Monte Carlo Simulations -------------------------------------------------
 
 monteCarlo <- function(seedNumber, reps, sampleSize, exp_mean, fit.beta.1,
@@ -23,8 +25,11 @@ monteCarlo <- function(seedNumber, reps, sampleSize, exp_mean, fit.beta.1,
     randBeta <- rbeta(sampleSize,fit.beta.1, fit.beta.2)
     randBeta <- randBeta * scale.beta
     
+    randExp <- rbeta(sampleSize,fit.beta.1, fit.beta.2)
+    randExp <- randExp * scale.beta
+    
     # Exponential distribution
-    randExp <- rexp(sampleSize, 1/exp_mean)
+    # randExp <- rexp(sampleSize, 1/exp_mean)
     
     # Insert the data to the simulations variable
     simulations[, 1, i] <- randBeta
