@@ -1,8 +1,9 @@
 if(!require(doParallel)) install.packages("doParallel")
 if(!require(foreach)) install.packages("foreach")
+if(!require(gridExtra)) install.packages("gridExtra")
 
 scenarios <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
-                      reps = 1000){
+                      reps = 1000, alpha = 0.05){
   
   # Get the number of iterations
   numberOfRepetitions <- length(sampleSizes)
@@ -34,17 +35,17 @@ scenarios <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
     nonParam.pValues <- nonParametricTesting(simulations)
     
     # Calculate the size/power of our parametric test
-    strengthRatio[j, 1] <- errorTypesRatio(param.pValues, 0.05)
+    strengthRatio[j, 1] <- errorTypesRatio(param.pValues, alpha)
     
     # Calculate the size/power of our non parametric test
-    strengthRatio[j, 2] <- errorTypesRatio(nonParam.pValues, 0.05)
+    strengthRatio[j, 2] <- errorTypesRatio(nonParam.pValues, alpha)
   }
   rownames(strengthRatio) <- paste(rownames(strengthRatio), "samples")
   return(strengthRatio)
 }
 
 scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
-                      reps = 1000){
+                      reps = 1000, alpha = 0.05){
   # Available cores
   nCores <- detectCores()
   
@@ -93,10 +94,10 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
                                  simulations = simulations)
     
     # Calculate the size/power of our parametric test
-    strengthRatio[j, 1] <- errorTypesRatio(param.pValues, 0.05)
+    strengthRatio[j, 1] <- errorTypesRatio(param.pValues, alpha)
     
     # Calculate the size/power of our non parametric test
-    strengthRatio[j, 2] <- errorTypesRatio(nonParam.pValues, 0.05)
+    strengthRatio[j, 2] <- errorTypesRatio(nonParam.pValues, alpha)
   }
   
   # Terminate the workers
@@ -107,7 +108,7 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
 }
 
 scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
-                               reps = 1000) {
+                               reps = 1000, alpha = 0.05) {
   # Available cores
   nCores <- detectCores()
   
@@ -151,15 +152,150 @@ scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2, seedN
                         simulations = simulations)
     
     # Calculate the size/power of our parametric test
-    strengthRatio[j, 1] <- errorTypesRatio(pValues[1, ], 0.05)
+    strengthRatio[j, 1] <- errorTypesRatio(pValues[1, ], alpha)
     
     # Calculate the size/power of our non parametric test
-    strengthRatio[j, 2] <- errorTypesRatio(pValues[2, ], 0.05)
+    strengthRatio[j, 2] <- errorTypesRatio(pValues[2, ], alpha)
   }
   
   # Terminate the workers
   stopCluster(myClust)
   
+  # Add a suffix to the sample sizes
   rownames(strengthRatio) <- paste(rownames(strengthRatio), "samples")
   return(strengthRatio)
 }
+
+
+scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
+                          sd1, sd2, scenario.type) {
+  # Get the length of the sampleSizes vector
+  sampleSizes.length <- length(sampleSizes)
+  
+  # Get the length of the variable parameter
+  variable.parameter.length <- length(variable.parameter)
+  
+  # Initialise parametric summary
+  scenario.summary.parametric <- matrix(data = NA, nrow = sampleSizes.length,
+                                        ncol = variable.parameter.length,
+                                        dimnames = list(sampleSizes,
+                                                        variable.parameter))
+  
+  # Initialise non-parametric summary
+  scenario.summary.nonParametric <- matrix(data = NA, nrow = sampleSizes.length,
+                                           ncol = variable.parameter.length,
+                                           dimnames = list(sampleSizes,
+                                                           variable.parameter))
+  
+  # Initialise the power/size matrix
+  strengthRatio <- matrix(data = NA, nrow = sampleSizes.length, ncol = 2)
+  
+  # Initialise iterator
+  j <- 0
+  
+  for (i in variable.parameter) {
+    # Increment the iterator
+    j <- j + 1
+    
+    # Run the scenario depending on the type
+    if(scenario.type == "Effect Size") {
+      strengthRatio <- scenarios.parallel.single(sampleSizes = sampleSizes,
+                                                 mean1 = mean1, mean2 = mean2 + i,
+                                                 sd1 = sd1, sd2 = sd2)
+    }
+    else if(scenario.type == "Alpha") {
+      strengthRatio <- scenarios.parallel.single(sampleSizes = sampleSizes,
+                                                 mean1 = mean1, mean2 = mean2,
+                                                 sd1 = sd1, sd2 = sd2,
+                                                 alpha = i)
+    }
+    else if(scenario.type == "Variance") {
+      strengthRatio <- scenarios.parallel.single(sampleSizes = sampleSizes,
+                                                 mean1 = mean1, mean2 = mean2,
+                                                 sd1 = sd1, sd2 = sd2 + i)
+    }
+    else {
+      stop("Parameter Error")
+    }
+    
+    # Add the result to the summary variables
+    scenario.summary.parametric[, j] <- strengthRatio[, 1]
+    scenario.summary.nonParametric[, j] <- strengthRatio[, 2]
+  }
+  
+  # Add row names
+  rownames(scenario.summary.parametric) <-
+    paste(rownames(scenario.summary.parametric), "samples")
+  rownames(scenario.summary.nonParametric) <-
+    paste(rownames(scenario.summary.nonParametric), "samples")
+  
+  # Add column names
+  colnames(scenario.summary.parametric) <-
+    paste(scenario.type, colnames(scenario.summary.parametric))
+  colnames(scenario.summary.nonParametric) <-
+    paste(scenario.type, colnames(scenario.summary.nonParametric))
+  
+  return(list("Parametric" = scenario.summary.parametric,
+              "Non Parametric" = scenario.summary.nonParametric))
+}
+
+scenarios.plot <- function(data, sampleSizes, variable.parameter) {
+  # Create a parametric and non parametric result data frame to draw the plot
+  dataFrame.param <- data.frame()
+  dataFrame.nonParam <- data.frame()
+  
+  # Initialise iterator
+  iterator <- 0
+  
+  # Create the 2 datasets, one for the parametric results and one for the
+  # non parametric
+  for(i in variable.parameter) {
+    # Increment the iterator
+    iterator <- iterator + 1
+    
+    # Add the data for the parametric values
+    dataFrame.param <-
+      rbind(dataFrame.param,
+            data.frame(Group = "Parametric",
+                       VariableParam = i,
+                       SampleSize = sampleSizes,
+                       Values = data$Parametric[, iterator]))
+    
+    # Add the data for the non parametric values
+    dataFrame.nonParam <-
+      rbind(dataFrame.nonParam,
+            data.frame(Group = "Non Parametric",
+                       VariableParam = i,
+                       SampleSize = sampleSizes,
+                       Values = data$`Non Parametric`[, iterator]))
+  }
+  
+  # Draw plot for the power/size Values ~ SampleSize for different
+  # variable parameters, for the parametric results
+  p1 <- ggplot(data = dataFrame.param,
+               mapping = aes(x = SampleSize, y = Values,
+                             colour = factor(VariableParam))) +
+    geom_point() +
+    geom_line()
+  
+  # Draw plot for the power/size values ~ SampleSize for different
+  # variable parameters, for the non parametric results
+  p2 <- ggplot(data = dataFrame.nonParam,
+               mapping = aes(x = SampleSize, y = Values,
+                             colour = factor(VariableParam))) +
+    geom_point() +
+    geom_line()
+  
+  # Display the plots together
+  gridExtra::grid.arrange(p1, p2, nrow = 2)
+}
+
+
+
+
+
+
+
+
+
+

@@ -14,11 +14,12 @@ source('./Code/Scenarios.R')
 # Display the range of values (min max) V
 # Get the mean for rich and poor contries V
 # Use them as properties for the ditributions V
-# The end result could be a table of the power having as rows the number of samples
-# and as columns the effect size
+# The end result could be a table of the power having as rows the number of samples V
+# and as columns the effect size V
 # Parallel code V
 # Research power and size to check for potential scenarios
 # Check truncnorm package, rtruncnorm
+# Add the power or size type to the returned value in the run scenario func, !don't add it as a table name
 
 # TODO:
 # Clean comments
