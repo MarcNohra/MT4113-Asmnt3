@@ -17,8 +17,8 @@ source('./Code/Scenarios.R')
 # The end result could be a table of the power having as rows the number of samples V
 # and as columns the effect size V
 # Parallel code V
-# Research power and size to check for potential scenarios
-# Check truncnorm package, rtruncnorm
+# Research power and size to check for potential scenarios V
+# Check truncnorm package, rtruncnorm V
 # Add the power or size type to the returned value in the run scenario func, !don't add it as a table name
 
 # TODO:
@@ -55,8 +55,10 @@ source('./Code/Scenarios.R')
 # Mann-Whitney U Test
 
 # Scenarios
-# Same means and SDs
+# Same means, different SDs
 # Different means same SDs
+# Increase the alpha
+# Change the distribution
 
 
 # Data Preparation --------------------------------------------------------
