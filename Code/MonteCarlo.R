@@ -38,7 +38,7 @@ monteCarlo <- function(seedNumber, reps, sampleSize, exp_mean, fit.beta.1,
   return(simulations)
 }
 
-monteCarlo.NormalDist <- function(seedNumber, reps, sampleSize, mean1, mean2,
+monteCarlo.NormalDist <- function(reps, sampleSize, mean1, mean2,
                                   sd1, sd2, distributionType = "Normal",
                                   min1 = NULL, min2 = NULL,
                                   max1 = NULL, max2 = NULL) {
@@ -50,9 +50,6 @@ monteCarlo.NormalDist <- function(seedNumber, reps, sampleSize, mean1, mean2,
   #   sampleSize - integer - the size of the samples to create
   # Outputs:
   #   
-  
-  # Set the seed for reproducibility
-  set.seed(seedNumber)
   
   # Initialising the simulations variable to return
   # Creating a 3d array, the rows represent the samples, the columns represent

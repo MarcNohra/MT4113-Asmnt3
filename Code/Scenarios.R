@@ -5,6 +5,9 @@ if(!require(gridExtra)) install.packages("gridExtra")
 scenarios <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
                       reps = 1000, alpha = 0.05){
   
+  # Set the seed for reproducibility
+  set.seed(seedNumber)
+  
   # Get the number of iterations
   numberOfRepetitions <- length(sampleSizes)
   
@@ -23,7 +26,7 @@ scenarios <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
     j <- j + 1
     
     # Run the simulations
-    simulations <- monteCarlo.NormalDist(seedNumber = seedNumber, reps = reps,
+    simulations <- monteCarlo.NormalDist(reps = reps,
                                          sampleSize = i,
                                          mean1 = mean1, mean2 = mean2,
                                          sd1 = sd1, sd2 = sd2)
@@ -48,6 +51,9 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
                       reps = 1000, alpha = 0.05, distributionType = "Normal",
                       min1 = NULL, min2 = NULL,
                       max1 = NULL, max2 = NULL){
+  # Set the seed for reproducibility
+  set.seed(seedNumber)
+  
   # Available cores
   nCores <- detectCores()
   
@@ -78,7 +84,7 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
     j <- j + 1
     
     # Run the simulations
-    simulations <- monteCarlo.NormalDist(seedNumber = seedNumber, reps = reps,
+    simulations <- monteCarlo.NormalDist(reps = reps,
                                          sampleSize = i,
                                          mean1 = mean1, mean2 = mean2,
                                          sd1 = sd1, sd2 = sd2,
@@ -113,8 +119,8 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
 }
 
 scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2,
-                                      seedNumber = 6272, reps = 1000,
-                                      alpha = 0.05, distributionType = "Normal",
+                                      reps = 1000, alpha = 0.05,
+                                      distributionType = "Normal",
                                       min1 = NULL, min2 = NULL,
                                       max1 = NULL, max2 = NULL) {
   
@@ -148,7 +154,7 @@ scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2,
     j <- j + 1
     
     # Run the simulations
-    simulations <- monteCarlo.NormalDist(seedNumber = seedNumber, reps = reps,
+    simulations <- monteCarlo.NormalDist(reps = reps,
                                          sampleSize = i,
                                          mean1 = mean1, mean2 = mean2,
                                          sd1 = sd1, sd2 = sd2,
@@ -185,6 +191,10 @@ scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
                           sd1, sd2, scenario.type, distributionType = "Normal",
                           min1 = NULL, min2 = NULL,
                           max1 = NULL, max2 = NULL, seedNumber = 6272) {
+  
+  # Set the seed for reproducibility
+  set.seed(seedNumber)
+  
   # Get the length of the sampleSizes vector
   sampleSizes.length <- length(sampleSizes)
   
@@ -220,8 +230,7 @@ scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
                                                  sd1 = sd1, sd2 = sd2,
                                                  distributionType = distributionType,
                                                  min1 = min1, min2 = min2,
-                                                 max1 = max1, max2 = max2,
-                                                 seedNumber = seedNumber)
+                                                 max1 = max1, max2 = max2)
     }
     else if(scenario.type == "Alpha") {
       strengthRatio <- scenarios.parallel.single(sampleSizes = sampleSizes,
@@ -230,8 +239,7 @@ scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
                                                  alpha = i,
                                                  distributionType = distributionType,
                                                  min1 = min1, min2 = min2,
-                                                 max1 = max1, max2 = max2,
-                                                 seedNumber = seedNumber)
+                                                 max1 = max1, max2 = max2)
     }
     else if(scenario.type == "Variance") {
       strengthRatio <- scenarios.parallel.single(sampleSizes = sampleSizes,
@@ -239,8 +247,7 @@ scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
                                                  sd1 = sd1, sd2 = sd2 + i,
                                                  distributionType = distributionType,
                                                  min1 = min1, min2 = min2,
-                                                 max1 = max1, max2 = max2,
-                                                 seedNumber = seedNumber)
+                                                 max1 = max1, max2 = max2)
     }
     else {
       stop("Parameter Error")
@@ -267,7 +274,8 @@ scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
               "Non Parametric" = scenario.summary.nonParametric))
 }
 
-scenarios.plot <- function(data, sampleSizes, variable.parameter) {
+scenarios.plot <- function(data, sampleSizes, variable.parameter,
+                           legendTitle = "") {
   # Create a parametric and non parametric result data frame to draw the plot
   dataFrame.param <- data.frame()
   dataFrame.nonParam <- data.frame()
@@ -302,19 +310,23 @@ scenarios.plot <- function(data, sampleSizes, variable.parameter) {
   # variable parameters, for the parametric results
   p1 <- ggplot(data = dataFrame.param,
                mapping = aes(x = SampleSize, y = Values,
-                             colour = factor(VariableParam))) +
+                             colour = as.factor(VariableParam))) +
     geom_point() +
     geom_line() + 
-    ggtitle("Parametric Test Strength")
+    ggtitle("Parametric Test Strength") +
+    labs(colour = legendTitle) +
+    theme(plot.title = element_text(hjust = 0.5))
   
   # Draw plot for the power/size values ~ SampleSize for different
   # variable parameters, for the non parametric results
   p2 <- ggplot(data = dataFrame.nonParam,
                mapping = aes(x = SampleSize, y = Values,
-                             colour = factor(VariableParam))) +
+                             colour = as.factor(VariableParam))) +
     geom_point() +
     geom_line() +
-    ggtitle("Non-Parametric Test Strength")
+    ggtitle("Non-Parametric Test Strength") +
+    labs(colour = legendTitle) +
+    theme(plot.title = element_text(hjust = 0.5))
   
   # Display the plots together
   gridExtra::grid.arrange(p1, p2, nrow = 2)

@@ -46,24 +46,6 @@ source('./Code/Scenarios.R')
 # for both the parametric and non-parametric tests.
 
 
-
-# Research Question:
-# Is life expectancy greater in rich countries (higher GDP per capita)?
-
-# 1 Parametric test
-# Independence samples (differences of two means)
-# Two sample t-test
-
-# 1 Non-parametric test
-# Mann-Whitney U Test
-
-# Scenarios
-# Same means, different SDs
-# Different means same SDs
-# Increase the alpha
-# Change the distribution
-
-
 # Data Preparation --------------------------------------------------------
 
 # Load gapminder dataset
@@ -147,9 +129,11 @@ life.expect.rich.summary <- subGapMinder %>% filter(country_type == "R") %>%
 # in rich and poor countries
   ggplot(data = subGapMinder) +
     geom_boxplot(aes(x = country_type, y = life_expectancy,
-                     colour = country_type))
+                     colour = country_type)) +
     scale_colour_manual(values = c("darkgreen", "blue")) +
-    labs(x = "Country Type", y = "Life Expectancy")
+    labs(x = "Country Type", y = "Life Expectancy") +
+    ggtitle("Differences in Life Expectancy\nMeans in the Different Country Types")+
+    theme(plot.title = element_text(hjust = 0.5))
 
 # Assumptions -------------------------------------------------------------
 
