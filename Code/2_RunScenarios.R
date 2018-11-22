@@ -26,42 +26,44 @@ scenarios.plot(scenario1.res, sampleSizes, variances,
 
 # Initialise parameters
 sampleSizes <- c(10, 100, 1000)
-effectSizes <- c(1, 1.2, 3, 5, 10)
+effectSizes <- c(1, 1.2, 3, 6)
 
 # Run the scenario
 scenario2.res <- scenarios.run(sampleSizes, effectSizes,
-                                    life.expect.poor.summary[[1]],
-                                    life.expect.poor.summary[[1]],
-                                    life.expect.poor.summary[[2]],
-                                    life.expect.poor.summary[[2]],
-                                    "Effect Size")
+                               mean1 = life.expect.poor.summary[[1]],
+                               mean2 = life.expect.poor.summary[[1]],
+                               sd1 = life.expect.poor.summary[[2]],
+                               sd2 = life.expect.poor.summary[[2]],
+                               scenario.type = "Effect Size",
+                               seedNumber = 6272)
 
 # Display results
 scenario2.res
 
 # Plot the result
-scenarios.plot(scenario2.res, sampleSizes, effectSizes)
+scenarios.plot(scenario2.res, sampleSizes, effectSizes,
+               "Effect Size")
 
 
 # Scenario 3: -------------------------------------------------------------
 # Increase the alpha
 
 # Create the parameters
+sampleSizes <- c(10, 100, 1000)
 alphaValues <- c(0.05, 0.06, 0.08, 0.1)
-sampleSizes <- c(10, 100, 300, 1000)
 
 # Run Scenario 3
 scenario3.res <- scenarios.run(sampleSizes, alphaValues,
-                               life.expect.poor.summary[[1]],
-                               life.expect.poor.summary[[1]],
-                               life.expect.poor.summary[[2]],
-                               life.expect.poor.summary[[2]],
-                               "Alpha")
+                               mean1 = life.expect.poor.summary[[1]],
+                               mean2 = life.expect.poor.summary[[1]],
+                               sd1 = life.expect.poor.summary[[2]],
+                               sd2 = life.expect.poor.summary[[2]],
+                               scenario.type = "Alpha", seedNumber = 6272)
 # Display Results
 scenario3.res
 
 # Plot Results
-scenarios.plot(scenario3.res, sampleSizes, alphaValues)
+scenarios.plot(scenario3.res, sampleSizes, alphaValues, "Alpha")
 
 # Scenario 4: -------------------------------------------------------------
 # Change the distribution
@@ -104,4 +106,4 @@ ggplot() +
   labs(colour = "Type Of Test") +
   ggtitle("Power variation with effect size") +
   theme(plot.title = element_text(hjust = 0.5))
-  
+
