@@ -12,40 +12,6 @@ source('./Code/SizePower.R')
 source('./Code/StatisticalTests.R')
 source('./Code/Scenarios.R')
 
-
-# TODO:
-# Display the range of values (min max) V
-# Get the mean for rich and poor contries V
-# Use them as properties for the ditributions V
-# The end result could be a table of the power having as rows the number of samples V
-# and as columns the effect size V
-# Parallel code V
-# Research power and size to check for potential scenarios V
-# Check truncnorm package, rtruncnorm V
-# Add the power or size type to the returned value in the run scenario func, !don't add it as a table name
-
-# TODO:
-# Clean comments
-# Check for the assumptions
-# do a qqplot durbin whatson for independency, for the spread ncv const error of variance
-# Add purpose for the functions
-# Rename main code, delete GapMinder.R
-
-
-# You are correct, size is only calculated when the null hypothesis is true and power
-# is calculated when it is false.  And yes, you will have scenarios where one or the
-# other is not calculable.  In your report, you should provide at least one result
-# describing simulated power and one result for statistical size for each of your statistical tests. 
-#
-# To extend the example given in the assignment, you might present your results as
-# a table of statistical power with columns for effect size (1 cm, 5 cm, 10 cm) and number of samples
-# in rows (10, 100, 1000), resulting in 9 estimates of power.
-# You could then have a second table where you hold effect size constant at 0 (null hypothesis = true),
-# but vary the number of samples and add bias to the reported values (e.g., rounding up),
-# leading to 9 values of size.  You would then include versions of these tables
-# for both the parametric and non-parametric tests.
-
-
 # Data Preparation --------------------------------------------------------
 
 # Load gapminder dataset
@@ -81,8 +47,8 @@ table(subGapMinder$country_type)
 # Data Analysis -----------------------------------------------------------
 
 par(mfrow = c(2, 2))
+
 # Histogram of the gdp/capita with the normal curve
-# Looks like exponentially distributed
 gdpCap <- subGapMinder$gdp_per_capita
 gdpHist <- hist(gdpCap, main = "GDP/Capita Frequency",
           xlab = "GDP/Capita", ylab = "Frequency", col = "darkgreen")
@@ -92,7 +58,6 @@ yfit <- yfit * diff(gdpHist$mids[1:2]) * length(gdpCap)
 lines(xfit, yfit, col = "red", lwd = 2)
 
 # Histogram of the life expectancy with the normal curve
-# Beta distributed
 lifeExp <- subGapMinder$life_expectancy
 lifeExpHist <- hist(subGapMinder$life_expectancy, main = "Life Expectancy Frequency",
      xlab = "Life Expectancy", ylab = "Frequency", col = "blue")
@@ -109,6 +74,7 @@ hist(poorLifeExp$life_expectancy, main = "Life Expectancy Frequency\nin Poor Cou
 richLifeExp <- subGapMinder %>% filter(country_type == "R")
 hist(richLifeExp$life_expectancy, main = "Life Expectancy Frequency\nin Rich Countries",
      xlab = "Life Expectancy", ylab = "Frequency", col = "blue")
+
 par(mfrow = c(1, 1))
 
 # Mean, variance and range of the life expectancy
@@ -138,9 +104,6 @@ life.expect.rich.summary <- subGapMinder %>% filter(country_type == "R") %>%
 # Assumptions -------------------------------------------------------------
 
 # 1_Normality
-# Notes:
-# H0: Assume the data comes from a normally ditributed data
-# p-value < 0.05 => reject the H0 => not normally distributed
 
 # qqplot for poor countries life expectancy
 subGapMinder %>% filter(country_type == "P") %>%

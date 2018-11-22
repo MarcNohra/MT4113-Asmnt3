@@ -26,10 +26,9 @@ scenarios <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
     j <- j + 1
     
     # Run the simulations
-    simulations <- monteCarlo.NormalDist(reps = reps,
-                                         sampleSize = i,
-                                         mean1 = mean1, mean2 = mean2,
-                                         sd1 = sd1, sd2 = sd2)
+    simulations <- monteCarlo(reps = reps, sampleSize = i,
+                              mean1 = mean1, mean2 = mean2,
+                              sd1 = sd1, sd2 = sd2)
     
     # Calculate the pValues from the parametric testing
     param.pValues <- parametricTesting(simulations)
@@ -48,9 +47,9 @@ scenarios <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
 }
 
 scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
-                      reps = 1000, alpha = 0.05, distributionType = "Normal",
-                      min1 = NULL, min2 = NULL,
-                      max1 = NULL, max2 = NULL){
+                               reps = 1000, alpha = 0.05, distributionType = "Normal",
+                               min1 = NULL, min2 = NULL,
+                               max1 = NULL, max2 = NULL){
   # Set the seed for reproducibility
   set.seed(seedNumber)
   
@@ -84,13 +83,12 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
     j <- j + 1
     
     # Run the simulations
-    simulations <- monteCarlo.NormalDist(reps = reps,
-                                         sampleSize = i,
-                                         mean1 = mean1, mean2 = mean2,
-                                         sd1 = sd1, sd2 = sd2,
-                                         distributionType = distributionType,
-                                         min1 = min1, min2 = min2,
-                                         max1 = max1, max2 = max2)
+    simulations <- monteCarlo(reps = reps, sampleSize = i,
+                              mean1 = mean1, mean2 = mean2,
+                              sd1 = sd1, sd2 = sd2,
+                              distributionType = distributionType,
+                              min1 = min1, min2 = min2,
+                              max1 = max1, max2 = max2)
     
     # Initialise the returned parametric and non parametric pValues vectors
     param.pValues <- numeric(reps)
@@ -98,7 +96,7 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
     
     # Calculate the pValues from the parametric testing
     param.pValues <- parApply(myClust, indexes, 1, parametricTesting.parallel,
-                             simulations = simulations)
+                              simulations = simulations)
     
     # Calculate the pValues from the non paramteric tesing
     nonParam.pValues <- parApply(myClust, indexes, 1, nonParametricTesting.parallel,
@@ -154,13 +152,12 @@ scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2,
     j <- j + 1
     
     # Run the simulations
-    simulations <- monteCarlo.NormalDist(reps = reps,
-                                         sampleSize = i,
-                                         mean1 = mean1, mean2 = mean2,
-                                         sd1 = sd1, sd2 = sd2,
-                                         distributionType = distributionType,
-                                         min1 = min1, min2 = min2,
-                                         max1 = max1, max2 = max2)
+    simulations <- monteCarlo(reps = reps, sampleSize = i,
+                              mean1 = mean1, mean2 = mean2,
+                              sd1 = sd1, sd2 = sd2,
+                              distributionType = distributionType,
+                              min1 = min1, min2 = min2,
+                              max1 = max1, max2 = max2)
     
     # Initialise the returned parametric and non parametric pValues martix
     pValues <- matrix(data = NA, nrow = reps, ncol = 2)

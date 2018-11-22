@@ -1,44 +1,6 @@
 if(!require(truncnorm)) install.packages("truncnorm")
 
-# Monte Carlo Simulations -------------------------------------------------
-
-monteCarlo <- function(seedNumber, reps, sampleSize, exp_mean, fit.beta.1,
-                       fit.beta.2, scale.beta) {
-  # Purpose:
-  #   Run a monte carlo simulation
-  # Inputs:
-  #   seedNumber - integer - parameter to reproduce the same random numbers
-  #   reps - integer - number of monte carlo repetitions
-  #   sampleSize - integer - the size of the samples to create
-  # Outputs:
-  #   
-  
-  # Set the seed for reproducibility
-  set.seed(seedNumber)
-  
-  # Initialising the simulations variable to return
-  simulations <- array(data = NA, dim = c(sampleSize, 2, reps),
-                       dimnames = list(c(), c("Poor", "Rich"), c()))
-  
-  for(i in 1:reps) {
-    # Beta distribution
-    randBeta <- rbeta(sampleSize,fit.beta.1, fit.beta.2)
-    randBeta <- randBeta * scale.beta
-    
-    randExp <- rbeta(sampleSize,fit.beta.1, fit.beta.2)
-    randExp <- randExp * scale.beta
-    
-    # Exponential distribution
-    # randExp <- rexp(sampleSize, 1/exp_mean)
-    
-    # Insert the data to the simulations variable
-    simulations[, 1, i] <- randBeta
-    simulations[, 2, i] <- randExp
-  }
-  return(simulations)
-}
-
-monteCarlo.NormalDist <- function(reps, sampleSize, mean1, mean2,
+monteCarlo <- function(reps, sampleSize, mean1, mean2,
                                   sd1, sd2, distributionType = "Normal",
                                   min1 = NULL, min2 = NULL,
                                   max1 = NULL, max2 = NULL) {
@@ -74,7 +36,7 @@ monteCarlo.NormalDist <- function(reps, sampleSize, mean1, mean2,
     else if(distributionType == "Truncate") {
       # Truncated Life Expectancy distribution for the poor countries
       poorLifeExp <- rtruncnorm(sampleSize, min1, max1, mean1, sd1)
-      
+
       # Truncated Life Expectancy distribution for the rich countries
       richLifeExp <- rtruncnorm(sampleSize, min2, max2, mean2, sd2)
     }

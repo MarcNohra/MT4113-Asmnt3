@@ -1,29 +1,3 @@
-# Scenario 0:
-# Beta Distribution
-
-xt <- subGapMinder$life_expectancy / ( max( subGapMinder$life_expectancy ) + .0001 )
-fit.beta <- fitdistr(xt, "beta", start = list(shape1 = 2, shape2 = 5))
-scale <- ( max( subGapMinder$life_expectancy ) + .0001 )
-
-simulation <- monteCarlo(6272, 1e3, 1000, 1, fit.beta$estimate[[1]], fit.beta$estimate[[2]], scale)
-param.pValues <- parametricTesting(simulation)
-nonParam.pValues <- nonParametricTesting(simulation)
-paramErr <- errorTypesRatio(param.pValues, 0.05)
-nparamErr <- errorTypesRatio(nonParam.pValues, 0.05)
-paramErr
-nparamErr
-hist(simulation)
-
-# Comparing
-# Run the scenario
-sampleSizes <- c(10, 100, 1000)
-variances <- c(0)
-scenario1.res <- scenarios.run(sampleSizes = sampleSizes,
-                               variable.parameter = variances,
-                               mean1 = 3, mean2 = 3, sd1 = 1, sd2 = 1,
-                               scenario.type = "Variance", seedNumber = 6272)
-scenario1.res
-
 # Scenario 1: -------------------------------------------------------------
 # Same means, different SDs
 # H0: the means are equal should be accepted
@@ -94,7 +68,7 @@ scenarios.plot(scenario3.res, sampleSizes, alphaValues)
 
 # Create the parameters
 sampleSizes <- c(10, 100, 1000)
-effectSizes <- c(0.3, 1, 5, 10)
+effectSizes <- c(1, 2, 3)
 
 # Run the scenario
 scenario4.res <- scenarios.run(sampleSizes, effectSizes,
@@ -114,11 +88,20 @@ scenario4.res
 
 # Plot the result
 scenarios.plot(scenario4.res, sampleSizes, effectSizes)
-x <- 2
 
+# Plot showing the variatin of power with the effect size
 ggplot() + 
-  geom_point(aes(x = effectSizes, y = scenario4.res$Parametric[x, ], colour = "red")) +
-  geom_line(aes(x = effectSizes, y = scenario4.res$Parametric[x, ], colour = "red")) +
-  geom_point(aes(x = effectSizes, y = scenario4.res$`Non Parametric`[x, ], colour = "blue")) +
-  geom_line(aes(x = effectSizes, y = scenario4.res$`Non Parametric`[x, ], colour = "blue"))
+  geom_point(aes(x = effectSizes, y = scenario4.res$Parametric[2, ],
+                 colour = "Parametric")) +
+  geom_line(aes(x = effectSizes, y = scenario4.res$Parametric[2, ],
+                colour = "Parametric")) +
+  geom_point(aes(x = effectSizes, y = scenario4.res$`Non Parametric`[2, ],
+                 colour = "Non-Parametric")) +
+  geom_line(aes(x = effectSizes, y = scenario4.res$`Non Parametric`[2, ],
+                colour = "Non-Parametric")) +
+  xlab("Effect Size") + 
+  ylab("Power") +
+  labs(colour = "Type Of Test") +
+  ggtitle("Power variation with effect size") +
+  theme(plot.title = element_text(hjust = 0.5))
   
