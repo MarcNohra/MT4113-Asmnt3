@@ -3,7 +3,23 @@ if(!require(foreach)) install.packages("foreach")
 if(!require(gridExtra)) install.packages("gridExtra")
 
 scenarios <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
-                      reps = 1000, alpha = 0.05){
+                      reps = 1000, alpha = 0.05) {
+  # Purpose:
+  #   This function simulates the complete algorithm
+  #   First it generates samples using the monteCarlo function,
+  #   then performs the statistical tests and finally calculates the power/size
+  #   This function returns the power/size for every sample size specified in
+  #   the sampleSizes parameter list
+  # Inputs:
+  #   sampleSizes - a list of the different sample sizes
+  #   mean1 - decimal - the mean of the first group simulation
+  #   mean2 - decimal - the mean of the second group simulation
+  #   seedNumber - integer
+  #   sd1, sd2 - decimal - the standard deviation of the first and second group
+  #   reps - integer - number of simulations to run
+  #   alpha - decimal - the significance level
+  # Outputs:
+  #   strengthRatio - matrix
   
   # Set the seed for reproducibility
   set.seed(seedNumber)
@@ -23,6 +39,7 @@ scenarios <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
   j <- 0
   
   for(i in sampleSizes) {
+    # Increment the iterator
     j <- j + 1
     
     # Run the simulations
@@ -42,14 +59,38 @@ scenarios <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
     # Calculate the size/power of our non parametric test
     strengthRatio[j, 2] <- errorTypesRatio(nonParam.pValues, alpha)
   }
+  
+  # Add a suffix for the sample sizes
   rownames(strengthRatio) <- paste(rownames(strengthRatio), "samples")
   return(strengthRatio)
 }
 
-scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber = 6272,
-                               reps = 1000, alpha = 0.05, distributionType = "Normal",
+scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2,
+                               seedNumber = 6272, reps = 1000, alpha = 0.05,
+                               distributionType = "Normal",
                                min1 = NULL, min2 = NULL,
-                               max1 = NULL, max2 = NULL){
+                               max1 = NULL, max2 = NULL) {
+  # Purpose:
+  #   This function simulates the complete algorithm using a cluster
+  #   First it generates samples using the monteCarlo function,
+  #   then performs the statistical tests in two parallel function calls,
+  #   and finally calculates the power/size.
+  #   This function returns the power/size for every sample size specified in
+  #   the sampleSizes parameter list
+  # Inputs:
+  #   sampleSizes - a list of the different sample sizes
+  #   mean1 - decimal - the mean of the first group simulation
+  #   mean2 - decimal - the mean of the second group simulation
+  #   sd1, sd2 - decimal - the standard deviation of the first and second group
+  #   seedNumber - integer
+  #   reps - integer - number of simulations to run
+  #   alpha - decimal - the significance level
+  #   distributionType - character - decides between a normal and
+  #                                   truncated distribution
+  #   min1, min2, max1, max2 - decimal - the range for the truncate distribution
+  # Outputs:
+  #   strengthRatio - matrix
+  
   # Set the seed for reproducibility
   set.seed(seedNumber)
   
@@ -58,9 +99,6 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
   
   # Create a cluster
   myClust <- makeCluster(nCores - 1, type = "PSOCK")
-  
-  # Register cluster for parallel
-  # registerDoParallel(myClust)
   
   # Get the number of iterations
   numberOfRepetitions <- length(sampleSizes)
@@ -80,6 +118,7 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
   indexes <- matrix(data = 1:reps, nrow = reps, ncol = 1)
   
   for(i in sampleSizes) {
+    # Increment the iterator
     j <- j + 1
     
     # Run the simulations
@@ -112,6 +151,7 @@ scenarios.parallel <- function(sampleSizes, mean1, mean2, sd1, sd2, seedNumber =
   # Terminate the workers
   stopCluster(myClust)
   
+  # Add suffix to the sample sizes
   rownames(strengthRatio) <- paste(rownames(strengthRatio), "samples")
   return(strengthRatio)
 }
@@ -121,15 +161,31 @@ scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2,
                                       distributionType = "Normal",
                                       min1 = NULL, min2 = NULL,
                                       max1 = NULL, max2 = NULL) {
+  # Purpose:
+  #   This function simulates the complete algorithm using a cluster
+  #   First it generates samples using the monteCarlo function,
+  #   then performs the statistical tests in one parallel function call,
+  #   and finally calculates the power/size.
+  #   This function returns the power/size for every sample size specified in
+  #   the sampleSizes parameter list
+  # Inputs:
+  #   sampleSizes - a list of the different sample sizes
+  #   mean1 - decimal - the mean of the first group simulation
+  #   mean2 - decimal - the mean of the second group simulation
+  #   sd1, sd2 - decimal - the standard deviation of the first and second group
+  #   reps - integer - number of simulations to run
+  #   alpha - decimal - the significance level
+  #   distributionType - character - decides between a normal and
+  #                                   truncated distribution
+  #   min1, min2, max1, max2 - decimal - the range for the truncate distribution
+  # Outputs:
+  #   strengthRatio - matrix
   
   # Available cores
   nCores <- detectCores()
   
   # Create a cluster
   myClust <- makeCluster(nCores - 1, type = "PSOCK")
-  
-  # Register cluster for parallel
-  # registerDoParallel(myClust)
   
   # Get the number of iterations
   numberOfRepetitions <- length(sampleSizes)
@@ -149,6 +205,7 @@ scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2,
   indexes <- matrix(data = 1:reps, nrow = reps, ncol = 1)
   
   for(i in sampleSizes) {
+    # Increment the iterator
     j <- j + 1
     
     # Run the simulations
@@ -165,8 +222,6 @@ scenarios.parallel.single <- function(sampleSizes, mean1, mean2, sd1, sd2,
     # Calculate the pValues from both tests
     pValues <- parApply(myClust, indexes, 1, statisticalTests, 
                         simulations = simulations)
-    
-    
     
     # Calculate the size/power of our parametric test
     strengthRatio[j, 1] <- errorTypesRatio(pValues[1, ], alpha)
@@ -188,6 +243,24 @@ scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
                           sd1, sd2, scenario.type, distributionType = "Normal",
                           min1 = NULL, min2 = NULL,
                           max1 = NULL, max2 = NULL, seedNumber = 6272) {
+  # Purpose:
+  #   This function simulates a complete scenario, it call the
+  #   scenarios.parallel.single function for every variable parameter.
+  #   The scenario.type can take any of the "Effect Size", "Alpha"
+  #   and "Variance" fot the different simulated scenarios.
+  #   The distributionType can be Normal or truncated.
+  #   Depending on the scenario type, the variable.parameter can represent
+  #   a list of effect size, variance or SD
+  # Inputs:
+  #   sampleSizes - a list of the different sample sizes
+  #   variable.parameter - list
+  #   mean1 - decimal - the mean of the first group simulation
+  #   mean2 - decimal - the mean of the second group simulation
+  #   sd1, sd2 - decimal - the standard deviation of the first and second group
+  #   scenario.type - character
+  #   distributionType - character - decides between a normal and
+  #                                   truncated distribution
+  #   min1, min2, max1, max2 - decimal - the range for the truncate distribution
   
   # Set the seed for reproducibility
   set.seed(seedNumber)
@@ -273,6 +346,14 @@ scenarios.run <- function(sampleSizes, variable.parameter, mean1, mean2,
 
 scenarios.plot <- function(data, sampleSizes, variable.parameter,
                            legendTitle = "") {
+  # Purpose:
+  #   This function creates plots for the different scenarios
+  # Inputs:
+  #   data - dataframe
+  #   sampleSizes - vector
+  #   variable.parameter - list
+  #   legendTitle - character - represents the title of the legend to display
+  
   # Create a parametric and non parametric result data frame to draw the plot
   dataFrame.param <- data.frame()
   dataFrame.nonParam <- data.frame()

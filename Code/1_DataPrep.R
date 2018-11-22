@@ -29,15 +29,17 @@ subGapMinder <- mutate(subGapMinder, gdp_per_capita = gdp / population)
 # Get some information about the data intervals to pick the "rich/poor" baseline
 gdp_cap_quantiles <- summary(subGapMinder$gdp_per_capita)
 rich.baseline <- round(gdp_cap_quantiles[5])
+
 # Adding groups based on the 3rd quantile of GDP/Capita = 6690
 # R: Rich contries with GDP/Capita >= 6690
 # P: Poor countries with GDP/Capita < 6690
 subGapMinder <- mutate(subGapMinder, country_type =
                          ifelse(gdp_per_capita >= rich.baseline, "R", "P"))
-View(subGapMinder)
 
 # Convert Country Type to factor
 subGapMinder$country_type <- factor(subGapMinder$country_type)
+
+View(subGapMinder)
 
 # Preview of the coutry types proportions
 # 75-25 since we picked the 3rd quantile as a baseline
@@ -52,18 +54,22 @@ par(mfrow = c(2, 2))
 gdpCap <- subGapMinder$gdp_per_capita
 gdpHist <- hist(gdpCap, main = "GDP/Capita Frequency",
           xlab = "GDP/Capita", ylab = "Frequency", col = "darkgreen")
+# Get the parameters for the normal curve
 xfit <- seq(min(gdpCap), max(gdpCap), length = 40) 
 yfit <- dnorm(xfit, mean = mean(gdpCap), sd = sd(gdpCap)) 
-yfit <- yfit * diff(gdpHist$mids[1:2]) * length(gdpCap) 
+yfit <- yfit * diff(gdpHist$mids[1:2]) * length(gdpCap)
+# Add the normal line
 lines(xfit, yfit, col = "red", lwd = 2)
 
 # Histogram of the life expectancy with the normal curve
 lifeExp <- subGapMinder$life_expectancy
 lifeExpHist <- hist(subGapMinder$life_expectancy, main = "Life Expectancy Frequency",
      xlab = "Life Expectancy", ylab = "Frequency", col = "blue")
+# Get the parameters for the normal curve
 xfit <- seq(min(lifeExp), max(lifeExp), length = 40) 
 yfit <- dnorm(xfit, mean = mean(lifeExp), sd = sd(lifeExp)) 
-yfit <- yfit * diff(lifeExpHist$mids[1:2]) * length(lifeExp) 
+yfit <- yfit * diff(lifeExpHist$mids[1:2]) * length(lifeExp)
+# Add the normal line
 lines(xfit, yfit, col = "red", lwd = 2)
 
 # Histogram of the poor countries' Life Expectancy

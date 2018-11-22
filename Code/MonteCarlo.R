@@ -5,13 +5,18 @@ monteCarlo <- function(reps, sampleSize, mean1, mean2,
                                   min1 = NULL, min2 = NULL,
                                   max1 = NULL, max2 = NULL) {
   # Purpose:
-  #   Run a monte carlo simulation
+  #   Run a monte carlo simulation depending on the distributionType
+  #   It can be normally distributed or truncated
   # Inputs:
-  #   seedNumber - integer - parameter to reproduce the same random numbers
   #   reps - integer - number of monte carlo repetitions
   #   sampleSize - integer - the size of the samples to create
+  #   mean1, mean2, sd1, sd2 - decimals - parameters for the distributions
+  #   distributionType - character - can be "Normal" or "Truncate"
+  #   min1, min2, max1, max2 - decimals - parameters for the distributions
   # Outputs:
-  #   
+  #   simulations - 3 dimentional array - the rows represent the samples,
+  # the columns represent the Groups and the 3rd dimension represent the 
+  # repetitions or resamples
   
   # Initialising the simulations variable to return
   # Creating a 3d array, the rows represent the samples, the columns represent

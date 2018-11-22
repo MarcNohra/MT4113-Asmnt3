@@ -91,7 +91,7 @@ scenario4.res
 # Plot the result
 scenarios.plot(scenario4.res, sampleSizes, effectSizes)
 
-# Plot showing the variatin of power with the effect size
+# Plot showing the variation of power with the effect size
 ggplot() + 
   geom_point(aes(x = effectSizes, y = scenario4.res$Parametric[2, ],
                  colour = "Parametric")) +
